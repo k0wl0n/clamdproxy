@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -38,7 +38,168 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ael6f69gclslca"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(virus_name) (clamdproxy_files_with_virus_total{virus_name!=\"\"})",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Virus Founded",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ael6f69gclslca"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 15
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "Prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum by(command) (clamdproxy_commands_total{allowed=\"true\"})",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "{{command}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Commands Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -61,7 +222,7 @@
         "h": 6,
         "w": 3,
         "x": 0,
-        "y": 1
+        "y": 9
       },
       "id": 16,
       "options": {
@@ -102,7 +263,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -125,7 +286,7 @@
         "h": 6,
         "w": 3,
         "x": 3,
-        "y": 1
+        "y": 9
       },
       "id": 17,
       "options": {
@@ -166,7 +327,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -189,7 +350,7 @@
         "h": 6,
         "w": 3,
         "x": 6,
-        "y": 1
+        "y": 9
       },
       "id": 13,
       "options": {
@@ -226,7 +387,72 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange"
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 9
+      },
+      "id": 21,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "Prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum(clamdproxy_files_size_bytes_total)",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "status {{code}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Total File Scanned",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -248,8 +474,8 @@
       "gridPos": {
         "h": 6,
         "w": 3,
-        "x": 9,
-        "y": 1
+        "x": 12,
+        "y": 9
       },
       "id": 14,
       "options": {
@@ -286,7 +512,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -308,8 +534,8 @@
       "gridPos": {
         "h": 6,
         "w": 3,
-        "x": 12,
-        "y": 1
+        "x": 15,
+        "y": 9
       },
       "id": 15,
       "options": {
@@ -350,7 +576,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -412,7 +638,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 15
       },
       "id": 9,
       "options": {
@@ -453,79 +679,12 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 7
-      },
-      "id": 11,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "text": {
-          "titleSize": 15
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "uid": "Prometheus"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum by(command) (clamdproxy_commands_total{allowed=\"true\"})",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "legendFormat": "{{command}}",
-          "range": true,
-          "refId": "A",
-          "useBackend": false
-        }
-      ],
-      "title": "Commands Total",
-      "type": "stat"
-    },
-    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 23
       },
       "id": 10,
       "panels": [],
@@ -535,7 +694,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -645,7 +804,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 24
       },
       "id": 1,
       "options": {
@@ -700,7 +859,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -761,7 +920,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 24
       },
       "id": 4,
       "options": {
@@ -816,7 +975,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fel1813ec2cjkd"
+        "uid": "ael6f69gclslca"
       },
       "fieldConfig": {
         "defaults": {
@@ -926,7 +1085,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 32
       },
       "id": 2,
       "options": {
@@ -1118,7 +1277,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 32
       },
       "id": 5,
       "options": {
@@ -1261,7 +1420,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 31
+        "y": 39
       },
       "id": 3,
       "options": {
@@ -1364,7 +1523,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 31
+        "y": 39
       },
       "id": 6,
       "options": {
@@ -1467,7 +1626,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 38
+        "y": 46
       },
       "id": 7,
       "options": {
@@ -1570,7 +1729,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 38
+        "y": 46
       },
       "id": 8,
       "options": {
@@ -1619,8 +1778,12 @@
       {
         "allValue": ".*",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "fel1813ec2cjkd",
         "includeAll": true,
@@ -1635,8 +1798,12 @@
       {
         "allValue": ".*",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "fel1813ec2cjkd",
         "includeAll": true,
@@ -1698,5 +1865,5 @@
   "timezone": "browser",
   "title": "Go Processes",
   "uid": "ypFZFgvmz",
-  "version": 2
+  "version": 16
 }

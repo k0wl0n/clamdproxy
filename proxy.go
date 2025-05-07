@@ -437,94 +437,94 @@ func (p *ClamdProxy) handleInstream(reader *bufio.Reader) error {
 
 	// After the INSTREAM command completes successfully, store the final file size
 	p.lastStreamSize = int64(totalBytes)
-	
+
 	// Flush the backend buffer to ensure all data is sent
 	if err := p.backendBuf.Flush(); err != nil {
 		return fmt.Errorf("failed to flush backend buffer: %w", err)
 	}
-	
+
 	return nil
 }
 
 // parseResponseForVirus checks if the response contains virus detection information
 // and records metrics if a virus is found
 func (p *ClamdProxy) parseResponseForVirus(response []byte) {
-    // Convert to string for easier parsing
-    respStr := string(response)
-    
-    // Add debug logging to see what's in the response
-    logger.Debug("Parsing response", "length", len(respStr), "preview", truncateString(respStr, 100))
-    
-    // Check if this is an INSTREAM response (either clean or with virus)
-    if strings.Contains(respStr, "stream") {
-        // Default to clean file (no virus)
-        virusFound := false
-        virusName := ""
-        filename := "stream"
-        
-        // Check for virus detection
-        if strings.Contains(respStr, " FOUND") {
-            logger.Debug("Found virus detection pattern in response")
-            lines := strings.Split(respStr, "\n")
-            for _, line := range lines {
-                if strings.Contains(line, " FOUND") {
-                    logger.Debug("Processing virus line", "line", line)
-                    parts := strings.Split(line, ": ")
-                    if len(parts) >= 2 {
-                        fileInfo := parts[0]
-                        detectionInfo := strings.TrimSuffix(parts[1], " FOUND")
-                        
-                        // Extract filename from fileInfo
-                        // Format: "instream(172.18.0.5@35478)"
-                        filename = fileInfo
-                        if strings.Contains(fileInfo, "(") && strings.Contains(fileInfo, ")") {
-                            // Extract the part between parentheses
-                            start := strings.Index(fileInfo, "(") + 1
-                            end := strings.Index(fileInfo, ")")
-                            if start > 0 && end > start {
-                                clientInfo := fileInfo[start:end]
-                                // Use client info as part of the filename
-                                filename = fileInfo[:start-1] + "_" + clientInfo
-                            }
-                        }
-                        
-                        virusFound = true
-                        virusName = detectionInfo
-                        
-                        logger.Info("Virus detected", 
-                            "file", filename,
-                            "virus", detectionInfo,
-                            "size", p.lastStreamSize)
-                    }
-                }
-            }
-        } else if strings.Contains(respStr, "OK") {
-            // This is a clean file
-            logger.Debug("Clean file detected", "size", p.lastStreamSize)
-        }
-        
-        // Record metrics for all scanned files, whether clean or infected
-        if proxyMetrics != nil {
-            // Use the actual file size if available
-            fileSize := p.lastStreamSize
-            if fileSize == 0 {
-                fileSize = int64(1024) // Default 1KB if size unknown
-            }
-            
-            proxyMetrics.RecordFileScan(filename, fileSize, virusFound, virusName)
-            
-            if virusFound {
-                logger.Debug("Recorded virus metrics", 
-                    "file", filename, 
-                    "size", fileSize, 
-                    "virus", virusName)
-            } else {
-                logger.Debug("Recorded clean file metrics", 
-                    "file", filename, 
-                    "size", fileSize)
-            }
-        }
-    }
+	// Convert to string for easier parsing
+	respStr := string(response)
+
+	// Add debug logging to see what's in the response
+	logger.Debug("Parsing response", "length", len(respStr), "preview", truncateString(respStr, 100))
+
+	// Check if this is an INSTREAM response (either clean or with virus)
+	if strings.Contains(respStr, "stream") {
+		// Default to clean file (no virus)
+		virusFound := false
+		virusName := ""
+		filename := "stream"
+
+		// Check for virus detection
+		if strings.Contains(respStr, " FOUND") {
+			logger.Debug("Found virus detection pattern in response")
+			lines := strings.Split(respStr, "\n")
+			for _, line := range lines {
+				if strings.Contains(line, " FOUND") {
+					logger.Debug("Processing virus line", "line", line)
+					parts := strings.Split(line, ": ")
+					if len(parts) >= 2 {
+						fileInfo := parts[0]
+						detectionInfo := strings.TrimSuffix(parts[1], " FOUND")
+
+						// Extract filename from fileInfo
+						// Format: "instream(172.18.0.5@35478)"
+						filename = fileInfo
+						if strings.Contains(fileInfo, "(") && strings.Contains(fileInfo, ")") {
+							// Extract the part between parentheses
+							start := strings.Index(fileInfo, "(") + 1
+							end := strings.Index(fileInfo, ")")
+							if start > 0 && end > start {
+								clientInfo := fileInfo[start:end]
+								// Use client info as part of the filename
+								filename = fileInfo[:start-1] + "_" + clientInfo
+							}
+						}
+
+						virusFound = true
+						virusName = detectionInfo
+
+						logger.Info("Virus detected",
+							"file", filename,
+							"virus", detectionInfo,
+							"size", p.lastStreamSize)
+					}
+				}
+			}
+		} else if strings.Contains(respStr, "OK") {
+			// This is a clean file
+			logger.Debug("Clean file detected", "size", p.lastStreamSize)
+		}
+
+		// Record metrics for all scanned files, whether clean or infected
+		if proxyMetrics != nil {
+			// Use the actual file size if available
+			fileSize := p.lastStreamSize
+			if fileSize == 0 {
+				fileSize = int64(1024) // Default 1KB if size unknown
+			}
+
+			proxyMetrics.RecordFileScan(filename, fileSize, virusFound, virusName)
+
+			if virusFound {
+				logger.Debug("Recorded virus metrics",
+					"file", filename,
+					"size", fileSize,
+					"virus", virusName)
+			} else {
+				logger.Debug("Recorded clean file metrics",
+					"file", filename,
+					"size", fileSize)
+			}
+		}
+	}
 }
 
 // Helper function to truncate long strings for logging

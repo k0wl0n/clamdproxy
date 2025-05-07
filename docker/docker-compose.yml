@@ -20,8 +20,8 @@ services:
       - clam-net
   clamdproxy:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../ 
+      dockerfile: docker/Dockerfile
     container_name: clamdproxy
     ports:
       - "3315:3315"
