@@ -109,12 +109,33 @@ func InitMetrics(metricsAddr string) (*Metrics, error) {
 		return nil, fmt.Errorf("failed to create command errors counter: %w", err)
 	}
 
-	// Remove the initialization of BytesTransferred and file scanning metrics
-	// The following section should be removed:
-	// m.BytesTransferred = ...
-	// m.FilesScanned = ...
-	// m.FilesSizeBytes = ...
-	// m.FilesWithVirus = ...
+	// Initialize file scanning metrics
+	m.FilesScanned, err = meter.Int64Counter(
+		"clamdproxy_files_scanned_total",
+		metric.WithDescription("Total number of files scanned"),
+		metric.WithUnit("{files}"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create files scanned counter: %w", err)
+	}
+
+	m.FilesSizeBytes, err = meter.Int64Counter(
+		"clamdproxy_files_size_bytes_total",
+		metric.WithDescription("Total size of files scanned in bytes"),
+		metric.WithUnit("By"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create file size counter: %w", err)
+	}
+
+	m.FilesWithVirus, err = meter.Int64Counter(
+		"clamdproxy_files_with_virus_total",
+		metric.WithDescription("Total number of files with viruses detected"),
+		metric.WithUnit("{files}"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create files with virus counter: %w", err)
+	}
 
 	// Start metrics HTTP server if address is provided
 	if metricsAddr != "" {
