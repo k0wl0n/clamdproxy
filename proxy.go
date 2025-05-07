@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
 // Buffer pools to reduce GC pressure
@@ -107,16 +108,19 @@ func (p *ClamdProxy) Start() {
 				bytesWritten += int64(nw)
 			}
 			if ew != nil {
+				logger.Error("Error writing to client buffer", "error", ew)
 				err = ew
 				break
 			}
 			if nr != nw {
+				logger.Error("Short write to client buffer", "expected", nr, "written", nw)
 				err = io.ErrShortWrite
 				break
 			}
 		}
 		if er != nil {
 			if er != io.EOF {
+				logger.Error("Error reading from backend", "error", er)
 				err = er
 			}
 			break
@@ -125,30 +129,24 @@ func (p *ClamdProxy) Start() {
 		// Flush the buffer periodically to avoid delays
 		if p.clientBuf.Buffered() > 32*1024 {
 			if err := p.clientBuf.Flush(); err != nil {
-				logger.Debug("Error flushing buffer to client", "error", err)
+				logger.Error("Error flushing buffer to client", "error", err)
 			}
 		}
 	}
 
 	// Final flush
 	if err := p.clientBuf.Flush(); err != nil {
-		logger.Debug("Error flushing final buffer to client", "error", err)
+		logger.Error("Error flushing final buffer to client", "error", err)
 	}
 
 	if err != nil {
 		if isConnectionClosed(err) {
-			logger.Debug("Backend connection closed",
-				"client", clientAddr,
-				"error", err)
+			logger.Debug("Backend connection closed", "client", clientAddr, "error", err)
 		} else {
-			logger.Debug("Error copying from backend to client",
-				"client", clientAddr,
-				"error", err)
+			logger.Error("Error copying from backend to client", "client", clientAddr, "error", err)
 		}
 	} else {
-		logger.Info("Proxy completed",
-			"client", clientAddr,
-			"bytesTransferred", bytesWritten)
+		logger.Info("Proxy completed", "client", clientAddr, "bytesTransferred", bytesWritten)
 	}
 }
 
@@ -171,6 +169,10 @@ func (p *ClamdProxy) handleClientToBackend() {
 					logger.Debug("Client connection closed", "client", clientAddr, "error", err)
 				} else {
 					logger.Debug("Error reading command", "client", clientAddr, "error", err)
+					// Record command error in metrics
+					if proxyMetrics != nil {
+						proxyMetrics.RecordCommandError("unknown", err.Error())
+					}
 				}
 			}
 			// Close the backend connection to signal we're done
@@ -183,11 +185,23 @@ func (p *ClamdProxy) handleClientToBackend() {
 		// Only log commands at appropriate levels
 		logger.Debug("Command received", "client", clientAddr, "command", cmd)
 
-		// Check if command is allowed
-		if isCommandAllowed(cmd) {
+		// Check if command is allowed and record start time
+		allowed := isCommandAllowed(cmd)
+		commandStart := time.Now()
+
+		// Record command metrics
+		if proxyMetrics != nil {
+			proxyMetrics.RecordCommand(cmd, allowed)
+		}
+
+		if allowed {
 			// Forward the command to backend using buffered writer
 			if _, err := p.backendBuf.Write(append([]byte(cmd), delim)); err != nil {
 				logger.Debug("Error forwarding command", "error", err)
+				// Record command error in metrics
+				if proxyMetrics != nil {
+					proxyMetrics.RecordCommandError(cmd, err.Error())
+				}
 				break
 			}
 			// Flush after each command to ensure it's sent immediately
@@ -196,15 +210,30 @@ func (p *ClamdProxy) handleClientToBackend() {
 				break
 			}
 
+			// Record command duration
+			if proxyMetrics != nil && !isInstreamCommand(cmd) {
+				proxyMetrics.RecordCommandDuration(cmd, time.Since(commandStart))
+			}
+
 			// Handle special case for INSTREAM command (file streaming)
 			if isInstreamCommand(cmd) {
 				logger.Debug("Processing INSTREAM data", "client", clientAddr)
 
+				instreamStart := time.Now()
 				if err := p.handleInstream(reader); err != nil {
 					logger.Debug("Error handling INSTREAM data",
 						"client", clientAddr,
 						"error", err)
+					// Record command error in metrics
+					if proxyMetrics != nil {
+						proxyMetrics.RecordCommandError(cmd, err.Error())
+					}
 					break
+				}
+
+				// Record INSTREAM command duration after completion
+				if proxyMetrics != nil {
+					proxyMetrics.RecordCommandDuration(cmd, time.Since(instreamStart))
 				}
 			}
 		} else {
@@ -214,6 +243,11 @@ func (p *ClamdProxy) handleClientToBackend() {
 			if _, err := p.clientBuf.WriteString(response); err != nil {
 				logger.Debug("Error sending error response", "error", err)
 				break
+			}
+
+			// Record command duration for blocked commands too
+			if proxyMetrics != nil {
+				proxyMetrics.RecordCommandDuration(cmd, time.Since(commandStart))
 			}
 			if err := p.clientBuf.Flush(); err != nil {
 				logger.Debug("Error flushing error response", "error", err)
