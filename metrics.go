@@ -225,11 +225,7 @@ func (m *Metrics) RecordFileScan(filename string, sizeBytes int64, virusFound bo
 	}
 
 	attrs := []attribute.KeyValue{
-		attribute.String("filename", filename),
-	}
-
-	if virusFound {
-		attrs = append(attrs, attribute.String("virus_name", virusName))
+		attribute.Bool("virus_detected", virusFound),
 	}
 
 	m.FilesScanned.Add(context.Background(), 1, metric.WithAttributes(attrs...))
@@ -237,6 +233,12 @@ func (m *Metrics) RecordFileScan(filename string, sizeBytes int64, virusFound bo
 
 	if virusFound {
 		m.FilesWithVirus.Add(context.Background(), 1, metric.WithAttributes(attrs...))
+		
+		// Log the detailed information instead of adding it as a label
+		logger.Info("Virus detected", 
+			"filename", filename, 
+			"virus_name", virusName,
+			"size_bytes", sizeBytes)
 	}
 }
 
