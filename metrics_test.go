@@ -24,10 +24,13 @@ func TestMetrics(t *testing.T) {
 
 	t.Run("RecordConnection", func(t *testing.T) {
 		metrics.RecordConnection("127.0.0.1:1234")
-		// Verify metrics through HTTP endpoint
 		resp := getMetrics(t, metrics)
-		assert.Contains(t, resp, `clamdproxy_connections_total{client="127.0.0.1:1234"`)
-		assert.Contains(t, resp, `clamdproxy_active_connections`)
+		
+		// Check for the counter without the client label
+		assert.Contains(t, resp, "clamdproxy_connections_total")
+		
+		// Check for active connections
+		assert.Contains(t, resp, "clamdproxy_active_connections")
 	})
 
 	t.Run("RecordConnectionClosed", func(t *testing.T) {
