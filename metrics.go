@@ -164,9 +164,7 @@ func (m *Metrics) RecordConnection(clientAddr string) {
 	if m == nil {
 		return
 	}
-	m.ConnectionsTotal.Add(context.Background(), 1, metric.WithAttributes(
-		attribute.String("client", clientAddr),
-	))
+	m.ConnectionsTotal.Add(context.Background(), 1)
 	m.ActiveConnections.Add(context.Background(), 1)
 }
 
@@ -233,10 +231,10 @@ func (m *Metrics) RecordFileScan(filename string, sizeBytes int64, virusFound bo
 
 	if virusFound {
 		m.FilesWithVirus.Add(context.Background(), 1, metric.WithAttributes(attrs...))
-		
+
 		// Log the detailed information instead of adding it as a label
-		logger.Info("Virus detected", 
-			"filename", filename, 
+		logger.Info("Virus detected",
+			"filename", filename,
 			"virus_name", virusName,
 			"size_bytes", sizeBytes)
 	}
